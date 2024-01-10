@@ -27,35 +27,31 @@
 #>
 [CmdletBinding(DefaultParameterSetName="NamedPipe")]
 param(
-    [Parameter(Mandatory=$true)]
     [ValidateNotNullOrEmpty()]
     [string]
-    $HostName,
+    $HostName = "PSES",
 
-    [Parameter(Mandatory=$true)]
     [ValidateNotNullOrEmpty()]
     [string]
-    $HostProfileId,
+    $HostProfileId = "PSES",
 
-    [Parameter(Mandatory=$true)]
     [ValidateNotNullOrEmpty()]
     [string]
-    $HostVersion,
+    $HostVersion = "0.0.0",
 
     [ValidateNotNullOrEmpty()]
     [string]
     $BundledModulesPath,
 
     [ValidateNotNullOrEmpty()]
-    $LogPath,
+    $LogPath = "PowerShellEditorServices.log",
 
     [ValidateSet("Diagnostic", "Verbose", "Normal", "Warning", "Error")]
     $LogLevel,
 
-	[Parameter(Mandatory=$true)]
 	[ValidateNotNullOrEmpty()]
 	[string]
-	$SessionDetailsPath,
+	$SessionDetailsPath = "PowerShellEditorServices.json",
 
     [switch]
     $EnableConsoleRepl,
@@ -77,9 +73,6 @@ param(
 
     [switch]
     $WaitForDebugger,
-
-    [switch]
-    $ConfirmInstall,
 
     [Parameter(ParameterSetName="Stdio", Mandatory=$true)]
     [switch]

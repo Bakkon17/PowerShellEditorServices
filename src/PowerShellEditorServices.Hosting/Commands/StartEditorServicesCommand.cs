@@ -39,33 +39,44 @@ namespace Microsoft.PowerShell.EditorServices.Commands
             Environment.SetEnvironmentVariable("POWERSHELL_DISTRIBUTION_CHANNEL", "PSES");
             _disposableResources = new List<IDisposable>();
             _loggerUnsubscribers = new List<IDisposable>();
+
+            // These are the actual defaults. Because of how PowerShell cmdlets work, the "defaults"
+            // in the corresponding .PS1 file don't matter (though they match for discoverability),
+            // nor can these be set at the field declaration because the engine resets parameters to
+            // null on invocation.
+            HostName = "PSES";
+            HostProfileId = "PSES";
+            HostVersion = new Version(0, 0, 0);
+            SessionDetailsPath = "PowerShellEditorServices.json";
+            LogPath = "PowerShellEditorServices.log";
+            LogLevel = PsesLogLevel.Normal;
         }
 
         /// <summary>
         /// The name of the EditorServices host to report.
         /// </summary>
-        [Parameter(Mandatory = true)]
+        [Parameter]
         [ValidateNotNullOrEmpty]
         public string HostName { get; set; }
 
         /// <summary>
         /// The ID to give to the host's profile.
         /// </summary>
-        [Parameter(Mandatory = true)]
+        [Parameter]
         [ValidateNotNullOrEmpty]
         public string HostProfileId { get; set; }
 
         /// <summary>
         /// The version to report for the host.
         /// </summary>
-        [Parameter(Mandatory = true)]
+        [Parameter]
         [ValidateNotNullOrEmpty]
         public Version HostVersion { get; set; }
 
         /// <summary>
         /// Path to the session file to create on startup or startup failure.
         /// </summary>
-        [Parameter(Mandatory = true)]
+        [Parameter]
         [ValidateNotNullOrEmpty]
         public string SessionDetailsPath { get; set; }
 
@@ -118,7 +129,7 @@ namespace Microsoft.PowerShell.EditorServices.Commands
         /// <summary>
         /// The path to where PowerShellEditorServices and its bundled modules are.
         /// </summary>
-        [Parameter]
+        [Parameter(Mandatory = true)]
         [ValidateNotNullOrEmpty]
         public string BundledModulesPath { get; set; }
 
@@ -133,7 +144,7 @@ namespace Microsoft.PowerShell.EditorServices.Commands
         /// The minimum log level that should be emitted.
         /// </summary>
         [Parameter]
-        public PsesLogLevel LogLevel { get; set; } = PsesLogLevel.Normal;
+        public PsesLogLevel LogLevel { get; set; }
 
         /// <summary>
         /// Paths to additional PowerShell modules to be imported at startup.
@@ -287,9 +298,12 @@ namespace Microsoft.PowerShell.EditorServices.Commands
 
         private string GetLogDirPath()
         {
-            string logDir = !string.IsNullOrEmpty(LogPath)
-                ? Path.GetDirectoryName(LogPath)
-                : Path.GetDirectoryName(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location));
+            string logDir = Path.GetDirectoryName(LogPath);
+            if (string.IsNullOrEmpty(logDir))
+            {
+                logDir = Directory.GetCurrentDirectory();
+                // Path.GetDirectoryName(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location));
+            }
 
             // Ensure logDir exists
             Directory.CreateDirectory(logDir);
